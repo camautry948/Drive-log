@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Teen Driving Log</title>
+<meta name="theme-color" content="#183153">
+<style>
+:root{
+  --bg:#f4f7fb; --card:#fff; --ink:#172033; --muted:#6b7280; --brand:#183153;
+  --brand2:#2c5282; --ok:#147d64; --warn:#b7791f; --danger:#b83232; --line:#d9e0ea;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:980px;margin:auto;padding:18px 14px 90px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+h1{font-size:1.55rem;margin:0}
+.sub{color:var(--muted);font-size:.92rem;margin-top:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(20,40,70,.05);margin-bottom:14px}
+.grid{display:grid;gap:12px}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+label{display:block;font-size:.83rem;font-weight:700;margin-bottom:5px;color:#3f4b60}
+input,select{width:100%;padding:12px 11px;border:1px solid #cfd7e3;border-radius:12px;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid #9bb9df;border-color:#7197c6}
+.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:750;background:var(--brand);color:#fff}
+.btn.secondary{background:#eaf0f7;color:var(--brand)}
+.btn.danger{background:#fae7e7;color:#982b2b}
+.btn.small{padding:8px 10px;font-size:.85rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat{padding:13px;border:1px solid var(--line);border-radius:14px;background:#fbfcfe}
+.stat b{display:block;font-size:1.55rem;margin-top:3px}
+.progress{height:11px;background:#e8edf4;border-radius:999px;overflow:hidden}
+.progress>span{display:block;height:100%;background:var(--brand2);width:0}
+.notice{padding:12px;border-radius:12px;background:#eef4fb;border-left:4px solid var(--brand2);font-size:.92rem}
+.notice.warn{background:#fff8e8;border-left-color:var(--warn)}
+.notice.ok{background:#edf9f5;border-left-color:var(--ok)}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:11px 0}
+.row:last-child{border-bottom:0}
+.row .meta{font-size:.86rem;color:var(--muted);margin-top:3px}
+.row .right{text-align:right;white-space:nowrap}
+.empty{text-align:center;color:var(--muted);padding:22px 10px}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:.75rem;font-weight:700;background:#edf2f7;color:#40506a}
+.badge.night{background:#e9e7fb;color:#51459a}
+.topline{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.hidden{display:none!important}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+small.helper{color:var(--muted);display:block;margin-top:5px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:20}
+.tabbar .inner{width:min(980px,100%);display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{border:0;background:transparent;padding:12px 6px 14px;color:#657084;font-weight:700}
+.tab.active{color:var(--brand)}
+.sectionTitle{font-size:1.05rem;margin:0 0 12px}
+.week-list{font-size:.9rem}
+.week{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)}
+.week.over{color:var(--danger);font-weight:700}
+.supervisor-card{padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+.icon{font-size:1.1rem;margin-right:4px}
+@media(max-width:700px){
+  .grid.two,.grid.three,.stats{grid-template-columns:1fr 1fr}
+  header{align-items:flex-start}
+}
+@media(max-width:470px){
+  .grid.two,.grid.three,.stats{grid-template-columns:1fr}
+  .row{align-items:flex-start}
+  .topline{align-items:flex-start}
+}
+#printArea{display:none}
+@media print{
+  body{background:#fff}
+  .app,.tabbar{display:none!important}
+  #printArea{display:block!important}
+  @page{size:letter portrait;margin:.35in}
+  .print-page{page-break-after:always;font-family:Arial,sans-serif;color:#000}
+  .print-page:last-child{page-break-after:auto}
+  .formcode{font-size:9px;display:flex;justify-content:space-between}
+  .dmv{text-align:center;margin:8px 0 10px;font-size:22px;font-weight:900;letter-spacing:1px}
+  .ptitle{text-align:center;font-size:15px;font-weight:800;margin-bottom:9px}
+  .req{font-size:9.5px;line-height:1.28;margin-bottom:7px}
+  .req b{display:block}
+  .fields{font-size:10px;border-top:1.5px solid #000;border-bottom:1.5px solid #000;padding:8px 0;margin:6px 0}
+  .fieldline{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:5px 0}
+  .sigline{display:grid;grid-template-columns:1fr 1fr 80px;gap:10px;margin:5px 0}
+  .blank{border-bottom:1px solid #000;min-height:14px;display:inline-block;width:100%;padding:0 3px}
+  .noticeprint{font-size:8px;font-style:italic;margin:5px 0}
+  table.log{width:100%;border-collapse:collapse;font-size:8px;table-layout:fixed}
+  table.log th,table.log td{border:1px solid #000;padding:2px 3px;text-align:center;height:18px;vertical-align:middle}
+  table.log th{background:#d8d8d8;font-weight:800}
+  table.log th:nth-child(1){width:10%}
+  table.log th:nth-child(2),table.log th:nth-child(3){width:11%}
+  table.log th:nth-child(4){width:15%}
+  table.log th:nth-child(5){width:31%}
+  table.log th:nth-child(6){width:22%}
+  .totals{display:flex;justify-content:space-between;margin-top:12px;font-size:10px}
+  .pageNo{text-align:center;font-size:8px;margin-top:8px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1 id="pageTitle">Teen Driving Log</h1>
+      <div class="sub" id="teenSubtitle">Set up your teen to begin.</div>
+    </div>
+    <button class="btn secondary small" id="quickBackup">Backup</button>
+  </header>
+
+  <section id="dashboardView">
+    <div class="card">
+      <div class="topline">
+        <h2 class="sectionTitle">Progress toward Level 2 log</h2>
+        <span class="badge" id="statusBadge">Not started</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>Total logged</span><b id="totalHours">0.0</b><small>hours</small></div>
+        <div class="stat"><span>Eligible toward 60</span><b id="eligibleHours">0.0</b><small>weekly cap applied</small></div>
+        <div class="stat"><span>Night</span><b id="nightHours">0.0</b><small>of 10 needed</small></div>
+        <div class="stat"><span>Remaining</span><b id="remainingHours">60.0</b><small>eligible hours</small></div>
+      </div>
+      <div style="margin-top:14px" class="progress"><span id="mainProgress"></span></div>
+      <div class="sub" id="progressText" style="margin-top:6px">0% complete</div>
+    </div>
+
+    <div id="completionNotice" class="notice hidden"></div>
+    <div id="weekWarning" class="notice warn hidden"></div>
+
+    <div class="card">
+      <div class="topline">
+        <h2 class="sectionTitle">Recent drives</h2>
+        <button class="btn" onclick="showView('add')">+ Add drive</button>
+      </div>
+      <div id="recentList"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="sectionTitle">Weekly totals</h2>
+      <div class="sub" style="margin-bottom:8px">Only up to 10 hours per week are counted toward the 60-hour requirement.</div>
+      <div id="weekList" class="week-list"></div>
+    </div>
+  </section>
+
+  <section id="addView" class="hidden">
+    <div class="card">
+      <h2 class="sectionTitle" id="driveFormTitle">Add driving session</h2>
+      <form id="driveForm">
+        <input type="hidden" id="editId">
+        <div class="grid two">
+          <div>
+            <label for="driveDate">Date</label>
+            <input id="driveDate" type="date" required>
+          </div>
+          <div>
+            <label for="driveType">Day or night</label>
+            <select id="driveType" required>
+              <option value="day">Day</option>
+              <option value="night">Night</option>
+            </select>
+          </div>
+          <div>
+            <label for="startTime">Start time</label>
+            <input id="startTime" type="time" required>
+          </div>
+          <div>
+            <label for="endTime">End time</label>
+            <input id="endTime" type="time" required>
+            <small class="helper">If the drive passes midnight, the app handles it automatically.</small>
+          </div>
+        </div>
+        <div class="notice" style="margin:14px 0">
+          Driving time: <b><span id="durationPreview">0.00</span> hours</b>
+        </div>
+        <div>
+          <label for="supervisorSelect">Supervising driver</label>
+          <select id="supervisorSelect" required></select>
+          <small class="helper">Supervising drivers are saved in Setup so you do not have to retype their license information.</small>
+        </div>
+        <div class="actions" style="margin-top:16px">
+          <button class="btn" type="submit">Save drive</button>
+          <button class="btn secondary" type="button" onclick="resetDriveForm();showView('dashboard')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section id="logView" class="hidden">
+    <div class="card">
+      <div class="topline">
+        <h2 class="sectionTitle">Full driving log</h2>
+        <button class="btn secondary small" id="printBtn">Print DMV-style log</button>
+      </div>
+      <div id="fullList"></div>
+    </div>
+  </section>
+
+  <section id="setupView" class="hidden">
+    <div class="card">
+      <h2 class="sectionTitle">Teen information</h2>
+      <div class="grid two">
+        <div>
+          <label for="teenName">Teen's full name</label>
+          <input id="teenName" placeholder="Customer name">
+        </div>
+        <div>
+          <label for="teenDL">Teen's permit / DL number</label>
+          <input id="teenDL" placeholder="Optional until known">
+        </div>
+      </div>
+      <button class="btn" style="margin-top:12px" id="saveTeen">Save teen information</button>
+    </div>
+
+    <div class="card">
+      <h2 class="sectionTitle">Supervising drivers</h2>
+      <div id="supervisorList"></div>
+      <hr>
+      <form id="supervisorForm">
+        <input type="hidden" id="supEditId">
+        <div class="grid three">
+          <div>
+            <label for="supName">Printed name</label>
+            <input id="supName" required placeholder="Full legal name">
+          </div>
+          <div>
+            <label for="supDL">Driver license number</label>
+            <input id="supDL" required>
+          </div>
+          <div>
+            <label for="supState">State</label>
+            <select id="supState" required></select>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn" type="submit">Save supervising driver</button>
+          <button class="btn secondary hidden" type="button" id="cancelSupEdit">Cancel edit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2 class="sectionTitle">Backup & restore</h2>
+      <div class="notice">
+        The app saves to this browser/device. Browser storage can be cleared, so keep a backup file somewhere safe.
+      </div>
+      <div class="actions" style="margin-top:12px">
+        <button class="btn" id="exportBackup">Download backup</button>
+        <label class="btn secondary" style="display:inline-block">
+          Restore backup
+          <input id="importBackup" type="file" accept=".json,application/json" hidden>
+        </label>
+        <button class="btn secondary" id="exportCsv">Export CSV</button>
+      </div>
+      <small class="helper">Restoring a backup replaces the information currently stored in the app.</small>
+
+      <hr>
+      <h3 style="margin:0 0 8px;font-size:1rem">Combine logs from multiple phones</h3>
+      <div class="notice">
+        Export a merge file from one phone, then import it on another. Existing entries are kept and new entries are added without intentionally replacing the current phone's log.
+      </div>
+      <div class="actions" style="margin-top:12px">
+        <button class="btn" id="exportMerge">Export merge file</button>
+        <label class="btn secondary" style="display:inline-block">
+          Import & combine
+          <input id="importMerge" type="file" accept=".json,application/json" hidden>
+        </label>
+      </div>
+      <small class="helper">The app matches supervising drivers by name, license number, and state, and skips duplicate driving sessions it can identify.</small>
+    </div>
+
+    <div class="card">
+      <h2 class="sectionTitle">Printed certification</h2>
+      <div class="grid two">
+        <div>
+          <label for="certSupervisor">Supervising driver who will certify the form</label>
+          <select id="certSupervisor"></select>
+        </div>
+        <div>
+          <label for="certDate">Certification date</label>
+          <input id="certDate" type="date">
+        </div>
+      </div>
+      <small class="helper">The signature line stays blank on the printed form so the supervising driver can sign it.</small>
+    </div>
+
+    <div class="card">
+      <h2 class="sectionTitle">Data safety</h2>
+      <button class="btn danger" id="clearAll">Erase all app data</button>
+    </div>
+  </section>
+</div>
+
+<nav class="tabbar">
+  <div class="inner">
+    <button class="tab active" data-view="dashboard">Home</button>
+    <button class="tab" data-view="add">Add Drive</button>
+    <button class="tab" data-view="log">Log</button>
+    <button class="tab" data-view="setup">Setup</button>
+  </div>
+</nav>
+
+<div id="printArea"></div>
+
+<script>
+const STORAGE_KEY='teenDrivingLog_v1';
+const STATES=['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'];
+
+let data = loadData();
+
+function freshData(){
+  return {
+    version:1,
+    teen:{name:'',dl:''},
+    supervisors:[],
+    drives:[],
+    certification:{supervisorId:'',date:''},
+    createdAt:new Date().toISOString()
+  };
+}
+function loadData(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    return raw ? {...freshData(),...JSON.parse(raw)} : freshData();
+  }catch(e){ return freshData(); }
+}
+function saveData(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  renderAll();
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function esc(s=''){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function calcHours(start,end){
+  if(!start||!end) return 0;
+  const [sh,sm]=start.split(':').map(Number), [eh,em]=end.split(':').map(Number);
+  let mins=(eh*60+em)-(sh*60+sm);
+  if(mins<0) mins+=24*60;
+  return mins/60;
+}
+function fmtHours(h){ return (Math.round((h+Number.EPSILON)*100)/100).toFixed(2); }
+function fmtTime(t){
+  if(!t) return '';
+  let [h,m]=t.split(':').map(Number); const ap=h>=12?'PM':'AM'; h=h%12||12;
+  return `${h}:${String(m).padStart(2,'0')} ${ap}`;
+}
+function fmtRange(d){ return `${fmtTime(d.start)}–${fmtTime(d.end)}`; }
+function weekStart(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  const day=d.getDay();
+  const diff=(day+6)%7; // Monday start
+  d.setDate(d.getDate()-diff);
+  return d.toISOString().slice(0,10);
+}
+function prettyDate(s){
+  if(!s) return '';
+  return new Date(s+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+}
+function stats(){
+  const drives=[...data.drives].sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+  let total=0,night=0,day=0; const weeks={};
+  for(const d of drives){
+    total+=d.hours;
+    if(d.type==='night') night+=d.hours; else day+=d.hours;
+    const w=weekStart(d.date); weeks[w]=(weeks[w]||0)+d.hours;
+  }
+  const eligible=Object.values(weeks).reduce((s,h)=>s+Math.min(10,h),0);
+  return {total,night,day,eligible,weeks,remaining:Math.max(0,60-eligible)};
+}
+function supervisorById(id){ return data.supervisors.find(s=>s.id===id); }
+
+function renderAll(){
+  document.getElementById('teenName').value=data.teen.name||'';
+  document.getElementById('teenDL').value=data.teen.dl||'';
+  document.getElementById('teenSubtitle').textContent=data.teen.name?`${data.teen.name}'s driving progress`:'Set up your teen to begin.';
+  renderStats(); renderRecent(); renderFullList(); renderSupervisors(); populateSupervisorSelects(); renderWeeks();
+}
+function renderStats(){
+  const s=stats();
+  totalHours.textContent=fmtHours(s.total);
+  eligibleHours.textContent=fmtHours(s.eligible);
+  nightHours.textContent=fmtHours(s.night);
+  remainingHours.textContent=fmtHours(s.remaining);
+  const pct=Math.min(100,(s.eligible/60)*100);
+  mainProgress.style.width=pct+'%';
+  progressText.textContent=`${Math.floor(pct)}% of the 60 eligible hours complete`;
+  const complete=s.eligible>=60 && s.night>=10;
+  statusBadge.textContent=complete?'Requirements reached':s.total?'In progress':'Not started';
+  statusBadge.style.background=complete?'#daf2e9':'';
+  completionNotice.className='notice '+(complete?'ok':'');
+  if(complete){
+    completionNotice.classList.remove('hidden');
+    completionNotice.innerHTML=`<b>Driving-hour requirements reached.</b> You have at least 60 eligible hours and at least 10 night hours. You can print the DMV-style log from the Log tab.`;
+  }else{
+    completionNotice.classList.add('hidden');
+  }
+  const over=Object.entries(s.weeks).filter(([w,h])=>h>10.0001);
+  if(over.length){
+    weekWarning.classList.remove('hidden');
+    weekWarning.innerHTML=`<b>Weekly cap warning:</b> ${over.length} week${over.length>1?'s':''} exceed 10 logged hours. The progress total only counts up to 10 hours from each week.`;
+  }else weekWarning.classList.add('hidden');
+}
+function renderRecent(){
+  const arr=[...data.drives].sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start)).slice(0,5);
+  recentList.innerHTML=arr.length?arr.map(d=>driveRow(d)).join(''):`<div class="empty">No driving sessions yet.</div>`;
+}
+function renderFullList(){
+  const arr=[...data.drives].sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start));
+  fullList.innerHTML=arr.length?arr.map(d=>driveRow(d,true)).join(''):`<div class="empty">No driving sessions yet.</div>`;
+}
+function driveRow(d,withActions=false){
+  const sup=supervisorById(d.supervisorId);
+  return `<div class="row">
+    <div>
+      <div><b>${prettyDate(d.date)}</b> <span class="badge ${d.type==='night'?'night':''}">${d.type==='night'?'Night':'Day'}</span></div>
+      <div class="meta">${esc(fmtRange(d))} · ${esc(sup?sup.name:'Unknown supervisor')}</div>
+    </div>
+    <div class="right"><b>${fmtHours(d.hours)} hr</b>
+      ${withActions?`<div class="actions" style="justify-content:flex-end;margin-top:5px">
+        <button class="btn secondary small" onclick="editDrive('${d.id}')">Edit</button>
+        <button class="btn danger small" onclick="deleteDrive('${d.id}')">Delete</button>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+function renderWeeks(){
+  const s=stats(); const entries=Object.entries(s.weeks).sort((a,b)=>b[0].localeCompare(a[0]));
+  weekList.innerHTML=entries.length?entries.map(([w,h])=>{
+    const d=new Date(w+'T12:00:00'); const end=new Date(d); end.setDate(end.getDate()+6);
+    return `<div class="week ${h>10.0001?'over':''}">
+      <span>${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}–${end.toLocaleDateString(undefined,{month:'short',day:'numeric'})}</span>
+      <span>${fmtHours(h)} logged / ${fmtHours(Math.min(10,h))} counted</span>
+    </div>`;
+  }).join(''):`<div class="empty">Weekly totals will appear here.</div>`;
+}
+function renderSupervisors(){
+  supervisorList.innerHTML=data.supervisors.length?data.supervisors.map(s=>`
+    <div class="supervisor-card">
+      <div class="topline">
+        <div><b>${esc(s.name)}</b><div class="meta">${esc(s.dl)} · ${esc(s.state)}</div></div>
+        <div class="actions">
+          <button class="btn secondary small" onclick="editSupervisor('${s.id}')">Edit</button>
+          <button class="btn danger small" onclick="deleteSupervisor('${s.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`).join(''):`<div class="empty">Add at least one supervising driver.</div>`;
+}
+function populateSupervisorSelects(){
+  const opts=data.supervisors.map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.state)}</option>`).join('');
+  supervisorSelect.innerHTML=data.supervisors.length?`<option value="">Select a supervising driver</option>${opts}`:`<option value="">Add a supervising driver in Setup first</option>`;
+  certSupervisor.innerHTML=`<option value="">Select certifying driver</option>${opts}`;
+  certSupervisor.value=data.certification.supervisorId||'';
+  certDate.value=data.certification.date||'';
+}
+function showView(view){
+  ['dashboard','add','log','setup'].forEach(v=>document.getElementById(v+'View').classList.toggle('hidden',v!==view));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+  if(view==='add' && !data.supervisors.length){ alert('Add a supervising driver in Setup before logging a drive.'); showView('setup'); }
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showView(t.dataset.view)));
+
+saveTeen.addEventListener('click',()=>{
+  data.teen.name=teenName.value.trim();
+  data.teen.dl=teenDL.value.trim();
+  saveData();
+  alert('Teen information saved.');
+});
+function fillStates(){
+  supState.innerHTML=STATES.map(s=>`<option value="${s}" ${s==='NC'?'selected':''}>${s}</option>`).join('');
+}
+fillStates();
+
+supervisorForm.addEventListener('submit',e=>{
+  e.preventDefault();
+  const id=supEditId.value;
+  const obj={id:id||uid(),name:supName.value.trim(),dl:supDL.value.trim(),state:supState.value};
+  if(id){
+    const i=data.supervisors.findIndex(s=>s.id===id); if(i>=0)data.supervisors[i]=obj;
+  }else data.supervisors.push(obj);
+  supervisorForm.reset(); supState.value='NC'; supEditId.value=''; cancelSupEdit.classList.add('hidden');
+  saveData();
+});
+function editSupervisor(id){
+  const s=supervisorById(id); if(!s)return;
+  supEditId.value=s.id; supName.value=s.name; supDL.value=s.dl; supState.value=s.state;
+  cancelSupEdit.classList.remove('hidden'); showView('setup'); supName.focus();
+}
+cancelSupEdit.addEventListener('click',()=>{supervisorForm.reset();supState.value='NC';supEditId.value='';cancelSupEdit.classList.add('hidden')});
+function deleteSupervisor(id){
+  if(data.drives.some(d=>d.supervisorId===id)){ alert('This supervising driver is used on a driving entry. Edit those entries before deleting the driver.'); return; }
+  if(confirm('Delete this supervising driver?')){
+    data.supervisors=data.supervisors.filter(s=>s.id!==id); saveData();
+  }
+}
+function updateDuration(){ durationPreview.textContent=fmtHours(calcHours(startTime.value,endTime.value)); }
+startTime.addEventListener('input',updateDuration); endTime.addEventListener('input',updateDuration);
+driveForm.addEventListener('submit',e=>{
+  e.preventDefault();
+  if(!supervisorSelect.value){alert('Select a supervising driver.');return;}
+  const hours=calcHours(startTime.value,endTime.value);
+  if(hours<=0){alert('Driving time must be greater than zero.');return;}
+  if(hours>12 && !confirm(`This entry is ${fmtHours(hours)} hours. Continue?`))return;
+  const id=editId.value;
+  const obj={id:id||uid(),date:driveDate.value,type:driveType.value,start:startTime.value,end:endTime.value,hours,supervisorId:supervisorSelect.value};
+  if(id){const i=data.drives.findIndex(d=>d.id===id);if(i>=0)data.drives[i]=obj;} else data.drives.push(obj);
+  resetDriveForm(); saveData(); showView('dashboard');
+});
+function resetDriveForm(){
+  driveForm.reset(); editId.value=''; driveFormTitle.textContent='Add driving session'; durationPreview.textContent='0.00';
+  driveDate.value=new Date().toISOString().slice(0,10);
+}
+function editDrive(id){
+  const d=data.drives.find(x=>x.id===id); if(!d)return;
+  showView('add'); editId.value=d.id; driveDate.value=d.date; driveType.value=d.type; startTime.value=d.start; endTime.value=d.end; supervisorSelect.value=d.supervisorId;
+  driveFormTitle.textContent='Edit driving session'; updateDuration();
+}
+function deleteDrive(id){
+  if(confirm('Delete this driving session?')){data.drives=data.drives.filter(d=>d.id!==id);saveData();}
+}
+resetDriveForm();
+
+certSupervisor.addEventListener('change',()=>{data.certification.supervisorId=certSupervisor.value;saveData()});
+certDate.addEventListener('change',()=>{data.certification.date=certDate.value;saveData()});
+
+function download(name,text,type='application/octet-stream'){
+  const blob=new Blob([text],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);
+}
+function backup(){
+  const safe=(data.teen.name||'teen').replace(/[^a-z0-9]+/gi,'_').replace(/^_|_$/g,'');
+  download(`${safe}_driving_log_backup_${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(data,null,2),'application/json');
+}
+exportBackup.addEventListener('click',backup); quickBackup.addEventListener('click',backup);
+
+function norm(v){ return String(v||'').trim().toLowerCase().replace(/\s+/g,' '); }
+function supervisorKey(s){ return [norm(s.name),norm(s.dl),norm(s.state)].join('|'); }
+function driveKey(d,sup){
+  return [
+    d.date||'', d.type||'', d.start||'', d.end||'',
+    Number(d.hours||0).toFixed(4),
+    supervisorKey(sup||{})
+  ].join('|');
+}
+function exportMergeFile(){
+  const safe=(data.teen.name||'teen').replace(/[^a-z0-9]+/gi,'_').replace(/^_|_$/g,'');
+  const payload={
+    kind:'teenDrivingLogMerge',
+    version:1,
+    exportedAt:new Date().toISOString(),
+    teen:{...data.teen},
+    supervisors:data.supervisors.map(s=>({...s})),
+    drives:data.drives.map(d=>({...d}))
+  };
+  download(`${safe}_driving_log_merge_${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(payload,null,2),'application/json');
+}
+exportMerge.addEventListener('click',exportMergeFile);
+
+importMerge.addEventListener('change',async e=>{
+  const file=e.target.files[0]; if(!file)return;
+  try{
+    const incoming=JSON.parse(await file.text());
+    if(!incoming || !Array.isArray(incoming.drives) || !Array.isArray(incoming.supervisors)){
+      throw new Error('Invalid merge file');
+    }
+
+    const currentTeen=norm(data.teen.name);
+    const incomingTeen=norm(incoming.teen && incoming.teen.name);
+    if(currentTeen && incomingTeen && currentTeen!==incomingTeen){
+      const ok=confirm(`This merge file is for "${incoming.teen.name}", while this phone is set up for "${data.teen.name}". Combine them anyway?`);
+      if(!ok){ e.target.value=''; return; }
+    }
+
+    if(!data.teen.name && incoming.teen && incoming.teen.name) data.teen.name=incoming.teen.name;
+    if(!data.teen.dl && incoming.teen && incoming.teen.dl) data.teen.dl=incoming.teen.dl;
+
+    const supMap=new Map(); // incoming id -> local id
+    const localByKey=new Map(data.supervisors.map(s=>[supervisorKey(s),s]));
+
+    let supervisorsAdded=0;
+    for(const s of incoming.supervisors){
+      const key=supervisorKey(s);
+      let local=localByKey.get(key);
+      if(!local){
+        local={id:uid(),name:s.name||'',dl:s.dl||'',state:s.state||''};
+        data.supervisors.push(local);
+        localByKey.set(key,local);
+        supervisorsAdded++;
+      }
+      supMap.set(s.id,local.id);
+    }
+
+    const existingDriveKeys=new Set(data.drives.map(d=>{
+      const s=supervisorById(d.supervisorId);
+      return driveKey(d,s);
+    }));
+
+    let added=0, skipped=0;
+    for(const d of incoming.drives){
+      const mappedId=supMap.get(d.supervisorId);
+      const mappedSup=data.supervisors.find(s=>s.id===mappedId);
+      const candidate={
+        id:uid(),
+        date:d.date||'',
+        type:d.type==='night'?'night':'day',
+        start:d.start||'',
+        end:d.end||'',
+        hours:Number(d.hours||calcHours(d.start,d.end)||0),
+        supervisorId:mappedId||''
+      };
+      const key=driveKey(candidate,mappedSup);
+      if(existingDriveKeys.has(key)){
+        skipped++;
+        continue;
+      }
+      data.drives.push(candidate);
+      existingDriveKeys.add(key);
+      added++;
+    }
+
+    saveData();
+    alert(`Logs combined. Added ${added} driving session${added===1?'':'s'} and ${supervisorsAdded} supervising driver${supervisorsAdded===1?'':'s'}. Skipped ${skipped} duplicate session${skipped===1?'':'s'}.`);
+  }catch(err){
+    alert('That file does not appear to be a valid merge file.');
+  }
+  e.target.value='';
+});
+importBackup.addEventListener('change',async e=>{
+  const file=e.target.files[0]; if(!file)return;
+  try{
+    const parsed=JSON.parse(await file.text());
+    if(!parsed || !Array.isArray(parsed.drives) || !Array.isArray(parsed.supervisors)) throw new Error('Invalid backup');
+    if(confirm('Restore this backup? It will replace the data currently in the app.')){
+      data={...freshData(),...parsed}; saveData(); alert('Backup restored.');
+    }
+  }catch(err){alert('That file does not appear to be a valid Teen Driving Log backup.');}
+  e.target.value='';
+});
+exportCsv.addEventListener('click',()=>{
+  const rows=[['Date','Day/Night','Start','End','Hours','Supervising Driver','Driver License','State']];
+  [...data.drives].sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start)).forEach(d=>{
+    const s=supervisorById(d.supervisorId)||{};
+    rows.push([d.date,d.type,d.start,d.end,fmtHours(d.hours),s.name||'',s.dl||'',s.state||'']);
+  });
+  const csv=rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  download('teen_driving_log.csv',csv,'text/csv');
+});
+clearAll.addEventListener('click',()=>{
+  if(confirm('Erase all teen information, supervising drivers, and driving entries from this device? This cannot be undone unless you have a backup.')){
+    localStorage.removeItem(STORAGE_KEY);data=freshData();saveData();alert('All app data erased.');
+  }
+});
+
+function makeRows(items,count){
+  const rows=[];
+  for(let i=0;i<count;i++){
+    const d=items[i], s=d?supervisorById(d.supervisorId):null;
+    rows.push(`<tr>
+      <td>${d?esc(new Date(d.date+'T12:00:00').toLocaleDateString(undefined,{month:'numeric',day:'numeric',year:'2-digit'})):''}</td>
+      <td>${d&&d.type==='day'?esc(fmtRange(d)):''}</td>
+      <td>${d&&d.type==='night'?esc(fmtRange(d)):''}</td>
+      <td>${d?fmtHours(d.hours):''}</td>
+      <td>${d&&s?esc(s.name):''}</td>
+      <td>${d&&s?esc(s.dl+' / '+s.state):''}</td>
+    </tr>`);
+  }
+  return rows.join('');
+}
+function tableHeader(){
+ return `<table class="log"><thead><tr>
+  <th>DATE</th><th>TIME OF<br>DAY</th><th>TIME OF<br>NIGHT</th><th>AMOUNT OF<br>DRIVING TIME<br>(E.G. # HOURS)</th>
+  <th>SUPERVISING DRIVER'S PRINTED NAME</th><th>SUPERVISING<br>DRIVER'S DL<br><i>(Number and State)</i></th>
+ </tr></thead><tbody>`;
+}
+function buildPrint(){
+  const arr=[...data.drives].sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+  const s=stats(), cert=supervisorById(data.certification.supervisorId);
+  const firstCount=20, nextCount=34;
+  const pages=[];
+  const first=arr.slice(0,firstCount);
+  pages.push(`<div class="print-page">
+    <div class="formcode"><span>Form DL-4A</span><span>09/2011</span></div>
+    <div class="dmv">NCDMV</div>
+    <div class="ptitle">DRIVING LOG TO ADVANCE TO N.C. LEVEL 2 LIMITED PROVISIONAL DRIVER LICENSE</div>
+    <div class="req"><b>REQUIREMENTS:</b>
+      • Complete a minimum of 60 hours of driving.<br>
+      • No more than 10 hours per week may count toward the 60 hours.<br>
+      • At least 10 of the 60 hours must be at night.<br>
+      • The log must be signed by a supervising driver and turned in to DMV upon application for the Level 2 driver license.<br>
+      • A supervising driver must be a parent, grandparent, or guardian of the permit holder or a responsible person approved by the parent or guardian, and must be a licensed driver who has been licensed for at least five years.
+    </div>
+    <div class="fields">
+      <div class="fieldline"><div>Customer Name: <span class="blank">${esc(data.teen.name)}</span></div><div>Customer's DL Number: <span class="blank">${esc(data.teen.dl)}</span></div></div>
+      <div>I <span class="blank" style="width:290px">${cert?esc(cert.name):''}</span>, do certify that the information on this form is true and accurate and is</div>
+      <div class="sigline"><div>in accordance with N.C. G.S. 20-11(d),</div><div class="blank"></div><div class="blank">${data.certification.date?esc(prettyDate(data.certification.date)):''}</div></div>
+      <div style="display:grid;grid-template-columns:1fr 80px;gap:10px;font-size:8px"><div style="text-align:right">Supervising Driver's Signature</div><div style="text-align:center">Date</div></div>
+    </div>
+    <div class="noticeprint"><b>Notice:</b> If the Division has cause to believe that a driving log has been falsified, the limited learner's permit holder shall be required to complete a new driving log with the same requirements and shall not be eligible to obtain a limited provisional license for six months.</div>
+    ${tableHeader()}${makeRows(first,firstCount)}</tbody></table>
+    <div class="pageNo">1 of ${Math.max(2,1+Math.ceil(Math.max(0,arr.length-firstCount)/nextCount))}</div>
+  </div>`);
+  let offset=firstCount, p=2;
+  do{
+    const chunk=arr.slice(offset,offset+nextCount);
+    const isLast=offset+nextCount>=arr.length;
+    pages.push(`<div class="print-page">
+      <div class="formcode"><span>Form DL-4A</span><span>09/2011</span></div>
+      ${tableHeader()}${makeRows(chunk,nextCount)}</tbody></table>
+      ${isLast?`<div class="totals"><span>Total Day Hours Driven: <b>${fmtHours(s.day)}</b></span><span>Total Night Hours Driven: <b>${fmtHours(s.night)}</b></span><span>Grand Total: <b>${fmtHours(s.total)}</b></span></div>`:''}
+      <div class="pageNo">${p} of ${Math.max(2,1+Math.ceil(Math.max(0,arr.length-firstCount)/nextCount))}</div>
+    </div>`);
+    offset+=nextCount;p++;
+  }while(offset<arr.length || p===2);
+  printArea.innerHTML=pages.join('');
+}
+printBtn.addEventListener('click',()=>{
+  if(!data.teen.name && !confirm('Teen name has not been entered in Setup. Print anyway?')) return;
+  buildPrint(); window.print();
+});
+
+window.addEventListener('beforeprint',buildPrint);
+renderAll();
+</script>
+</body>
+</html>
